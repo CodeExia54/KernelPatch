@@ -1,4 +1,4 @@
-name: Build CI
+name: CI Workflow
 
 on:
   workflow_call:
@@ -62,7 +62,7 @@ jobs:
 
           cd ../demo-syscallhook
           make
-          mv syscallhook.kpm demo-syscallhook.kpm
+          mv syscallhook.kpm demo-inlinehook.kpm
 
       - name: Upload elf
         uses: actions/upload-artifact@v4
@@ -71,12 +71,6 @@ jobs:
             kernel/kpimg.elf-linux
             kernel/kpimg.elf-android
           name: kpimg.elf
-
-      - name: Upload kpms folder
-        uses: actions/upload-artifact@v4
-        with:
-        path: kpms/
-        name: kpms
 
       - name: Release
         uses: ncipollo/release-action@v1.14.0
@@ -94,6 +88,28 @@ jobs:
           allowUpdates: true
           makeLatest: true
           replacesArtifacts: true
+
+  Zip-kpms:
+    runs-on: ubuntu-latest
+    needs: Build-kpimg  # Ensuring this runs after the Build-kpimg job
+    permissions:
+      contents: write
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Zip kpms folder
+        run: |
+          zip -r kpms.zip kpms
+
+      - name: Upload kpms zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build CI
+          path: kpms.zip
+
+  # Existing jobs go here...
+
 
   Release-user-lib:
     runs-on: ubuntu-latest
