@@ -2,12 +2,21 @@
 /* 
  * Copyright (C) 2023 bmax121. All Rights Reserved.
  */
-
+/*
 #include <compiler.h>
 #include <kpmodule.h>
 #include <linux/printk.h>
 #include <uapi/asm-generic/unistd.h>
 #include <linux/uaccess.h>
+#include <linux/string.h>
+#include <asm/current.h>
+*/
+#include <compiler.h>
+#include <kpmodule.h>
+#include <linux/printk.h>
+#include <uapi/asm-generic/unistd.h>
+#include <linux/uaccess.h>
+#include <syscall.h>
 #include <linux/string.h>
 #include <asm/current.h>
 #include <hook.h>
