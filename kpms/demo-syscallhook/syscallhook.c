@@ -25,12 +25,12 @@ KPM_DESCRIPTION("KernelPatch Module process_vm_readv Hook Example");
 typedef struct hook_fargs6 { /* Define this structure */ } hook_fargs6_t;
 typedef int hook_err_t; // Define this type according to your library's specification
 
-void before_process_vm_readv(hook_fargs6_t *args, void *udata);
+void before_process_vm_readv(hook_fargs8_t *args, void *udata);
 
 static long syscall_hook_init(const char *args, const char *event, void __user *reserved);
 static long syscall_hook_exit(void __user *reserved);
 
-void before_process_vm_readv(hook_fargs6_t *args, void *udata)
+void before_process_vm_readv(hook_fargs8_t *args, void *udata)
 {
     pid_t pid = (pid_t)syscall_argn(args, 0);
     const struct iovec *local_iov = (const struct iovec *)syscall_argn(args, 1);
