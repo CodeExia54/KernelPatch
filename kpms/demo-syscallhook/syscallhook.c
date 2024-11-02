@@ -10,6 +10,7 @@
 #include <linux/uaccess.h>
 #include <linux/string.h>
 #include <asm/current.h>
+#include <hook.h>
 
 // Make sure KPM_NAME_LEN is large enough for your module name
 #define KPM_NAME_LEN 64  // Adjust this as needed based on your module name length
