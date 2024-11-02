@@ -24,13 +24,11 @@ jobs:
           VERSION="$MAJOR.$MINOR.$PATCH"
           echo "Generated Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Extract branch name
         shell: bash
         id: extract_branch
         run: |
           echo "BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-
       - name: Install Compiler
         run: |
           curl -o arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf.tar.xz https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf.tar.xz
@@ -38,7 +36,6 @@ jobs:
       - name: Build kpimg
         run: |
           export TARGET_COMPILE=`pwd`/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-
-
           cd kernel
           make
           mv kpimg kpimg-linux
@@ -48,19 +45,14 @@ jobs:
           make
           mv kpimg kpimg-android
           mv kpimg.elf kpimg.elf-android
-
           cd ..
           cd kpms
-
           cd demo-hello
           make
-
           cd ../demo-inlinehook
           make
-
           cd ../demo-syscallhook
           make
-
       - name: Upload elf
         uses: actions/upload-artifact@v4
         with:
@@ -68,7 +60,13 @@ jobs:
             kernel/kpimg.elf-linux
             kernel/kpimg.elf-android
           name: kpimg.elf
-
+          
+      - name: Upload kpms folder
+        uses: actions/upload-artifact@v4
+        with:
+          path: kpms/
+          name: kpms
+    
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -86,28 +84,6 @@ jobs:
           makeLatest: true
           replacesArtifacts: true
 
-  Zip-kpms:
-    runs-on: ubuntu-latest
-    needs: Build-kpimg  # Ensuring this runs after the Build-kpimg job
-    permissions:
-      contents: write
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Zip kpms folder
-        run: |
-          zip -r kpms.zip kpms
-
-      - name: Upload kpms zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: Build CI
-          path: kpms.zip
-
-  # Existing jobs go here...
-
-
   Release-user-lib:
     runs-on: ubuntu-latest
     permissions:
@@ -124,7 +100,6 @@ jobs:
           VERSION="$MAJOR.$MINOR.$PATCH"
           echo "Generated Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Zip-lib
         run: |
           export TARGET_COMPILE=placeholder
@@ -132,7 +107,6 @@ jobs:
           make hdr
           cd ..
           zip -r kpuser.zip user
-
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -163,7 +137,6 @@ jobs:
           VERSION="$MAJOR.$MINOR.$PATCH"
           echo "Generated Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
         id: setup-ndk
@@ -176,7 +149,6 @@ jobs:
           export TARGET_COMPILE=placeholder
           cd kernel
           make hdr
-
       - name: Build kpatch-android
         run: |
           cd user
@@ -191,7 +163,6 @@ jobs:
           cmake --build .
           unset ANDROID
           mv kpatch kpatch-android
-
       - name: Build kptools-android
         run: |
           cd tools
@@ -204,7 +175,6 @@ jobs:
             -DANDROID_ABI=arm64-v8a ../..
           cmake --build .
           mv kptools kptools-android
-
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -234,13 +204,11 @@ jobs:
           VERSION="$MAJOR.$MINOR.$PATCH"
           echo "Generated Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Make hdr
         run: |
           export TARGET_COMPILE=placeholder
           cd kernel
           make hdr
-
       - name: Build kptools
         run: |
           export ANDROID=1
@@ -249,7 +217,6 @@ jobs:
           cmake ..
           make
           mv kptools kptools-linux
-
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -298,7 +265,6 @@ jobs:
         run: |
           cd tools
           msys2 -c 'make'
-
       - name: Copyfile2
         shell: pwsh
         run: |
@@ -377,13 +343,11 @@ jobs:
           VERSION="$MAJOR.$MINOR.$PATCH"
           echo "Generated Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Make hdr
         run: |
           export TARGET_COMPILE=placeholder
           cd kernel
           make hdr
-
       - name: Build kptools
         run: |
           export ANDROID=1
