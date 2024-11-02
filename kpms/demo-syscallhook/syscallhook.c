@@ -13,7 +13,7 @@
 #include <hook.h>
 
 // Make sure KPM_NAME_LEN is large enough for your module name
-#define KPM_NAME_LEN 64  // Adjust this as needed based on your module name length
+// #define KPM_NAME_LEN 64  // Adjust this as needed based on your module name length
 
 // Ensure the info string length is less than or equal to KPM_NAME_LEN
 KPM_NAME("kpm-syscall-hook-process_vm_readv");
