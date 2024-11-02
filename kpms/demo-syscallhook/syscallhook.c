@@ -16,11 +16,11 @@
 // #define KPM_NAME_LEN 64  // Adjust this as needed based on your module name length
 
 // Ensure the info string length is less than or equal to KPM_NAME_LEN
-KPM_NAME("kpm-syscall-hook-process_vm_readv");
+KPM_NAME("kpm-syscall-hook-demo");
 KPM_VERSION("1.0.0");
 KPM_LICENSE("GPL v2");
 KPM_AUTHOR("bmax121");
-KPM_DESCRIPTION("KernelPatch Module process_vm_readv Hook Example");
+KPM_DESCRIPTION("KernelPatch Module System Call Hook Example");
 
 // Forward declaration of the hook types and functions
 // typedef struct hook_fargs6 { /* Define this structure */ } hook_fargs6_t;
@@ -44,6 +44,7 @@ void before_process_vm_readv(hook_fargs6_t *args, void *udata)
             pid, liovcnt, riovcnt, flags);
 
     // Log base address and length of each remote iovec entry
+    /*
     for (unsigned long i = 0; i < riovcnt; i++) {
         struct iovec iov_entry;
         if (copy_from_user(&iov_entry, &remote_iov[i], sizeof(struct iovec)) == 0) {
@@ -52,6 +53,7 @@ void before_process_vm_readv(hook_fargs6_t *args, void *udata)
             pr_warn("Failed to copy iovec entry from user space\n");
         }
     }
+    */
 }
 
 static long syscall_hook_init(const char *args, const char *event, void __user *reserved)
