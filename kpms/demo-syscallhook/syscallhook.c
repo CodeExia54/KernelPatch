@@ -17,9 +17,6 @@ KPM_LICENSE("GPL v2");
 KPM_AUTHOR("bmax121");
 KPM_DESCRIPTION("KernelPatch Module process_vm_readv Hook Example");
 
-const char *margs = 0;
-enum hook_type hook_type = NONE;
-
 void before_process_vm_readv(hook_fargs6_t *args, void *udata)
 {
     pid_t pid = (pid_t)syscall_argn(args, 0);
@@ -29,56 +26,42 @@ void before_process_vm_readv(hook_fargs6_t *args, void *udata)
     unsigned long riovcnt = (unsigned long)syscall_argn(args, 4);
     unsigned long flags = (unsigned long)syscall_argn(args, 5);
 
-    struct task_struct *task = current;
+    pr_info("process_vm_readv called by pid: %d, liovcnt: %lu, riovcnt: %lu, flags: %lu\n",
+            pid, liovcnt, riovcnt, flags);
 
-    pr_info("process_vm_readv called by task: %llx, pid: %d, liovcnt: %lu, riovcnt: %lu, flags: %lu\n",
-            task, pid, liovcnt, riovcnt, flags);
+    // Log base address and length of each remote iovec entry
+    for (unsigned long i = 0; i < riovcnt; i++) {
+        struct iovec iov_entry;
+        if (copy_from_user(&iov_entry, &remote_iov[i], sizeof(struct iovec)) == 0) {
+            pr_info("remote_iov[%lu]: iov_base = %p, iov_len = %zu\n", i, iov_entry.iov_base, iov_entry.iov_len);
+        } else {
+            pr_warn("Failed to copy iovec entry from user space\n");
+        }
+    }
 }
 
-static long syscall_hook_demo_init(const char *args, const char *event, void *__user reserved)
+static long syscall_hook_init(const char *args, const char *event, void *__user reserved)
 {
-    margs = args;
-    pr_info("kpm-syscall-hook-process_vm_readv init ..., args: %s\n", margs);
+    pr_info("Initializing syscall hook for process_vm_readv\n");
 
-    if (!margs) {
-        pr_warn("no args specified, skip hook\n");
-        return 0;
-    }
-
-    hook_err_t err = HOOK_NO_ERR;
-
-    if (!strcmp("function_pointer_hook", margs)) {
-        pr_info("function pointer hook ...");
-        hook_type = FUNCTION_POINTER_CHAIN;
-        err = fp_hook_syscalln(__NR_process_vm_readv, 6, before_process_vm_readv, 0, 0);
-    } else if (!strcmp("inline_hook", margs)) {
-        pr_info("inline hook ...");
-        hook_type = INLINE_CHAIN;
-        err = inline_hook_syscalln(__NR_process_vm_readv, 6, before_process_vm_readv, 0, 0);
-    } else {
-        pr_warn("unknown args: %s\n", margs);
-        return 0;
-    }
-
+    hook_err_t err = fp_hook_syscalln(__NR_process_vm_readv, 6, before_process_vm_readv, 0, 0);
     if (err) {
-        pr_err("hook process_vm_readv error: %d\n", err);
-    } else {
-        pr_info("hook process_vm_readv success\n");
+        pr_err("Failed to hook process_vm_readv: error %d\n", err);
+        return -1;
     }
+
+    pr_info("process_vm_readv hook installed successfully\n");
     return 0;
 }
 
-static long syscall_hook_demo_exit(void *__user reserved)
+static long syscall_hook_exit(void *__user reserved)
 {
-    pr_info("kpm-syscall-hook-process_vm_readv exit ...\n");
+    pr_info("Removing syscall hook for process_vm_readv\n");
 
-    if (hook_type == INLINE_CHAIN) {
-        inline_unhook_syscall(__NR_process_vm_readv, before_process_vm_readv, 0);
-    } else if (hook_type == FUNCTION_POINTER_CHAIN) {
-        fp_unhook_syscall(__NR_process_vm_readv, before_process_vm_readv, 0);
-    }
+    fp_unhook_syscall(__NR_process_vm_readv, before_process_vm_readv, 0);
+    pr_info("process_vm_readv hook removed successfully\n");
     return 0;
 }
 
-KPM_INIT(syscall_hook_demo_init);
-KPM_EXIT(syscall_hook_demo_exit);
+KPM_INIT(syscall_hook_init);
+KPM_EXIT(syscall_hook_exit);
