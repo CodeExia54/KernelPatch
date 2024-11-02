@@ -72,6 +72,12 @@ jobs:
             kernel/kpimg.elf-android
           name: kpimg.elf
 
+      - name: Upload kpms folder
+        uses: actions/upload-artifact@v4
+        with:
+        path: kpms/
+        name: kpms
+
       - name: Release
         uses: ncipollo/release-action@v1.14.0
         with:
