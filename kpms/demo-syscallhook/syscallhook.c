@@ -11,11 +11,24 @@
 #include <linux/string.h>
 #include <asm/current.h>
 
+// Make sure KPM_NAME_LEN is large enough for your module name
+#define KPM_NAME_LEN 64  // Adjust this as needed based on your module name length
+
+// Ensure the info string length is less than or equal to KPM_NAME_LEN
 KPM_NAME("kpm-syscall-hook-process_vm_readv");
 KPM_VERSION("1.0.0");
 KPM_LICENSE("GPL v2");
 KPM_AUTHOR("bmax121");
 KPM_DESCRIPTION("KernelPatch Module process_vm_readv Hook Example");
+
+// Forward declaration of the hook types and functions
+typedef struct hook_fargs6 { /* Define this structure */ } hook_fargs6_t;
+typedef int hook_err_t; // Define this type according to your library's specification
+
+void before_process_vm_readv(hook_fargs6_t *args, void *udata);
+
+static long syscall_hook_init(const char *args, const char *event, void __user *reserved);
+static long syscall_hook_exit(void __user *reserved);
 
 void before_process_vm_readv(hook_fargs6_t *args, void *udata)
 {
@@ -40,7 +53,7 @@ void before_process_vm_readv(hook_fargs6_t *args, void *udata)
     }
 }
 
-static long syscall_hook_init(const char *args, const char *event, void *__user reserved)
+static long syscall_hook_init(const char *args, const char *event, void __user *reserved)
 {
     pr_info("Initializing syscall hook for process_vm_readv\n");
 
@@ -54,7 +67,7 @@ static long syscall_hook_init(const char *args, const char *event, void *__user 
     return 0;
 }
 
-static long syscall_hook_exit(void *__user reserved)
+static long syscall_hook_exit(void __user *reserved)
 {
     pr_info("Removing syscall hook for process_vm_readv\n");
 
